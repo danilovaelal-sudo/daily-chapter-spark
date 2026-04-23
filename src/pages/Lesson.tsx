@@ -92,22 +92,23 @@ export default function Lesson() {
   return (
     <article className="pb-20">
       {/* Header */}
-      <div className="bg-ink text-ink-foreground">
-        <div className="container py-10 md:py-14">
-          <Link to="/program" className="inline-flex items-center gap-2 text-amber hover:underline mb-8 text-sm">
+      <div className="bg-ink text-ink-foreground border-b-2 border-foreground relative overflow-hidden">
+        <div className="absolute -right-32 -top-32 h-96 w-96 rounded-full bg-amber/20 blur-3xl" />
+        <div className="container py-12 md:py-20 relative">
+          <Link to="/program" className="inline-flex items-center gap-2 text-amber hover:underline mb-10 text-xs uppercase tracking-[0.22em] font-bold">
             <ArrowLeft className="h-4 w-4" /> Программа
           </Link>
-          <div className="flex flex-wrap items-center gap-3 mb-4">
-            <span className="font-mono text-xs tracking-widest text-amber bg-amber/10 px-3 py-1.5 rounded-full">
+          <div className="flex flex-wrap items-center gap-3 mb-6">
+            <span className="font-mono text-[11px] tracking-[0.25em] text-amber bg-amber/15 border border-amber/40 px-3 py-1.5 rounded-full">
               ДЕНЬ {String(lesson.day_number).padStart(2, "0")} / 30
             </span>
             {done && (
-              <span className="inline-flex items-center gap-1.5 text-xs uppercase tracking-widest font-bold bg-amber text-amber-foreground px-3 py-1.5 rounded-full">
+              <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.22em] font-black bg-amber text-amber-foreground px-3 py-1.5 rounded-full">
                 <CheckCircle2 className="h-3.5 w-3.5" /> Выполнено
               </span>
             )}
           </div>
-          <h1 className="display-lg max-w-4xl">{lesson.title}</h1>
+          <h1 className="display-xl max-w-5xl">{lesson.title}</h1>
         </div>
       </div>
 
