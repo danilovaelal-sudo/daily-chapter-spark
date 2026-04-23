@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, getAccessInfo } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import { ArrowRight, CalendarDays, CheckCircle2, Sparkles } from "lucide-react";
 
 interface Lesson {
   id: string;
@@ -38,6 +38,34 @@ export default function Today() {
   const greetingHour = new Date().getHours();
   const greeting = greetingHour < 6 ? "Доброй ночи" : greetingHour < 12 ? "Доброе утро" : greetingHour < 18 ? "Добрый день" : "Добрый вечер";
   const name = profile?.full_name?.split(" ")[0] || "автор";
+
+  if (!access.hasStarted && access.startDate) {
+    return (
+      <section className="min-h-[calc(100vh-5rem)] bg-ink text-ink-foreground flex items-center">
+        <div className="container py-16 md:py-24">
+          <div className="max-w-4xl">
+            <div className="eyebrow text-amber mb-6">Мастерская ждёт старта</div>
+            <h1 className="display-xl mb-8">
+              {greeting}, {name}.<br />
+              Ваш доступ откроется {access.startDate.toLocaleDateString("ru-RU")}.
+            </h1>
+            <p className="text-lg md:text-2xl text-ink-foreground/75 max-w-2xl font-display font-medium leading-snug mb-10">
+              Вы уже внутри платформы. Как только наступит дата, установленная администратором, откроется первый день курса.
+            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="inline-flex items-center gap-3 rounded-full border border-amber/40 bg-amber/10 px-5 py-3 text-amber">
+                <CalendarDays className="h-5 w-5" />
+                <span className="font-mono text-xs uppercase tracking-[0.2em]">Старт {access.startDate.toLocaleDateString("ru-RU")}</span>
+              </div>
+              <Button asChild variant="amber" size="xl">
+                <Link to="/program">Смотреть программу</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <div>
