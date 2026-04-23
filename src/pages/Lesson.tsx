@@ -46,13 +46,15 @@ export default function Lesson() {
     })();
   }, [user, dayNum]);
 
-  if (dayNum > access.daysElapsed) {
+  if (!access.hasStarted || dayNum > access.daysElapsed) {
     return (
       <div className="container py-20 text-center max-w-md mx-auto">
         <Lock className="h-12 w-12 mx-auto mb-6 text-muted-foreground" />
         <h1 className="display-md mb-3">День ещё не открыт</h1>
         <p className="text-muted-foreground mb-6">
-          Мастерская идёт в ритме одного дня. Этот урок откроется на {dayNum}-й день вашего курса.
+          {!access.hasStarted && access.startDate
+            ? `Доступ начнётся ${access.startDate.toLocaleDateString("ru-RU")}. После этого урок откроется в свой день курса.`
+            : `Мастерская идёт в ритме одного дня. Этот урок откроется на ${dayNum}-й день вашего курса.`}
         </p>
         <Button asChild variant="ink"><Link to="/program">К программе</Link></Button>
       </div>

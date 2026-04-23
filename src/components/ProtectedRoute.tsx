@@ -32,7 +32,7 @@ export default function ProtectedRoute({
   // Check 30-day access (admins always have access)
   if (!isAdmin && profile) {
     const access = getAccessInfo(profile.start_date);
-    if (!access.hasAccess) {
+    if (access.hasStarted && !access.hasAccess) {
       return <Navigate to="/access-ended" replace />;
     }
   }

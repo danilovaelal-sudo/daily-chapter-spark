@@ -37,6 +37,8 @@ export default function Program() {
     { num: 4, range: [22, 30], title: "Текст" },
   ];
 
+  const currentDay = Math.max(access.daysElapsed, 1);
+
   return (
     <div>
       <div className="bg-ink text-ink-foreground border-b-2 border-foreground">
@@ -77,8 +79,8 @@ export default function Program() {
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {items.map((l) => {
                   const isDone = completed.has(l.id);
-                  const isLocked = l.day_number > access.daysElapsed;
-                  const isToday = l.day_number === access.daysElapsed;
+                   const isLocked = !access.hasStarted || l.day_number > currentDay;
+                   const isToday = access.hasStarted && l.day_number === currentDay;
 
                   const card = (
                     <div
