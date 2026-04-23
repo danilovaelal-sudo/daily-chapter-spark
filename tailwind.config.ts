@@ -86,12 +86,14 @@ export default {
       backgroundImage: {
         "gradient-ink": "var(--gradient-ink)",
         "gradient-amber": "var(--gradient-amber)",
+        "gradient-hot": "var(--gradient-hot)",
         "gradient-paper": "var(--gradient-paper)",
       },
       boxShadow: {
         soft: "var(--shadow-soft)",
         bold: "var(--shadow-bold)",
         amber: "var(--shadow-amber)",
+        hot: "var(--shadow-hot)",
       },
       borderRadius: {
         lg: "var(--radius)",
