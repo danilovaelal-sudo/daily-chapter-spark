@@ -169,6 +169,12 @@ export default function Lesson() {
           </section>
         )}
 
+        {done && (
+          <div className="rounded-2xl bg-amber/15 border-2 border-amber/40 p-6 text-center my-8 animate-fade-up">
+            <div className="font-display font-bold text-2xl">Шаг сделан. Идём дальше.</div>
+          </div>
+        )}
+
         <div className="border-t-2 border-foreground/10 pt-8 mt-12 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
           <Button onClick={handleComplete} variant={done ? "outline" : "amber"} size="lg" className="flex-1 sm:flex-none">
             {done ? "Урок отмечен как выполненный" : "Отметить как выполнено"}
