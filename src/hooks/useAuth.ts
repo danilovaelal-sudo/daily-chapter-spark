@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface AccessInfo {
   hasAccess: boolean;
+  hasStarted: boolean;
   daysElapsed: number; // 1-based
   daysRemaining: number;
   startDate: Date | null;
@@ -56,14 +57,20 @@ export function useAuth() {
 }
 
 export function getAccessInfo(startDate: string | null | undefined): AccessInfo {
-  if (!startDate) return { hasAccess: false, daysElapsed: 0, daysRemaining: 0, startDate: null, isAdmin: false };
-  const start = new Date(startDate + "T00:00:00");
+  if (!startDate) {
+    return { hasAccess: false, hasStarted: false, daysElapsed: 0, daysRemaining: 30, startDate: null, isAdmin: false };
+  }
+
+  const start = new Date(`${startDate}T00:00:00`);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
   const diffMs = today.getTime() - start.getTime();
   const dayIndex = Math.floor(diffMs / 86400000); // 0 on day 1
-  const daysElapsed = Math.max(1, dayIndex + 1);
-  const daysRemaining = Math.max(0, 30 - daysElapsed + 1);
-  const hasAccess = daysElapsed >= 1 && daysElapsed <= 30;
-  return { hasAccess, daysElapsed, daysRemaining, startDate: start, isAdmin: false };
+  const hasStarted = dayIndex >= 0;
+  const daysElapsed = hasStarted ? dayIndex + 1 : 0;
+  const daysRemaining = hasStarted ? Math.max(0, 30 - daysElapsed + 1) : 30;
+  const hasAccess = hasStarted && daysElapsed <= 30;
+
+  return { hasAccess, hasStarted, daysElapsed, daysRemaining, startDate: start, isAdmin: false };
 }
