@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -17,36 +17,70 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<{ full_name: string | null; start_date: string } | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const initializedRef = useRef(false);
 
   const loadProfile = useCallback(async (uid: string) => {
-    const [{ data: prof }, { data: roles }] = await Promise.all([
+    const [{ data: prof, error: profileError }, { data: roles, error: rolesError }] = await Promise.all([
       supabase.from("profiles").select("full_name, start_date").eq("id", uid).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", uid),
     ]);
+
+    if (profileError || rolesError) {
+      console.error("Failed to load auth profile", { profileError, rolesError });
+    }
+
     setProfile(prof ?? null);
     setIsAdmin(!!roles?.some((r) => r.role === "admin"));
   }, []);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    let active = true;
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (!initializedRef.current && event === "INITIAL_SESSION") {
+        return;
+      }
+
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+
+      if (nextSession?.user) {
+        setLoading(true);
+        setTimeout(() => {
+          loadProfile(nextSession.user.id)
+            .catch((error) => console.error("Failed to refresh auth profile", error))
+            .finally(() => {
+              if (active) setLoading(false);
+            });
+        }, 0);
+      } else {
+        setProfile(null);
+        setIsAdmin(false);
+        setLoading(false);
+      }
+    });
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!active) return;
+
       setSession(session);
       setUser(session?.user ?? null);
+
       if (session?.user) {
-        setTimeout(() => loadProfile(session.user.id), 0);
+        await loadProfile(session.user.id);
       } else {
         setProfile(null);
         setIsAdmin(false);
       }
-    });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) loadProfile(session.user.id);
+      initializedRef.current = true;
       setLoading(false);
     });
 
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
   }, [loadProfile]);
 
   const signOut = async () => {
