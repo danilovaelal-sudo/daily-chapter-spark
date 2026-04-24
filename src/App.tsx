@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Today from "./pages/Today";
 import Program from "./pages/Program";
 import Lesson from "./pages/Lesson";
@@ -25,6 +26,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<Auth />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/access-ended" element={<AccessEnded />} />
           <Route path="/" element={<ProtectedRoute><Today /></ProtectedRoute>} />
           <Route path="/program" element={<ProtectedRoute><Program /></ProtectedRoute>} />

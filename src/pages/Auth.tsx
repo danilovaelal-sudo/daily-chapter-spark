@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import heroImg from "@/assets/hero.jpg";
 
 export default function Auth() {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -17,9 +17,15 @@ export default function Auth() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
+      setHasSession(!!session);
+    });
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setHasSession(!!session);
     });
+
+    return () => subscription.subscription.unsubscribe();
   }, []);
 
   if (hasSession) return <Navigate to="/" replace />;
@@ -27,27 +33,42 @@ export default function Auth() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    const normalizedEmail = email.trim().toLowerCase();
+
     try {
-      if (mode === "signup") {
+      if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        toast.success("Отправили письмо для смены пароля.");
+        setMode("signin");
+      } else if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
-          email,
+          email: normalizedEmail,
           password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { full_name: fullName },
+            data: { full_name: fullName.trim() },
           },
         });
         if (error) throw error;
         toast.success("Аккаунт создан. Добро пожаловать в мастерскую.");
         navigate("/");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
         if (error) throw error;
         toast.success("С возвращением");
         navigate("/");
       }
     } catch (err: any) {
-      toast.error(err.message ?? "Что-то пошло не так");
+      const message = err?.message ?? "Что-то пошло не так";
+      if (message.toLowerCase().includes("invalid login credentials")) {
+        toast.error("Неверный e-mail или пароль. Если входите с другого браузера, нажмите «Сбросить пароль».");
+      } else {
+        toast.error(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -99,11 +120,15 @@ export default function Auth() {
 
           <div>
             <div className="eyebrow text-amber mb-3">Вход в курс</div>
-            <h2 className="display-lg">{mode === "signup" ? "Создать аккаунт" : "С возвращением"}</h2>
+            <h2 className="display-lg">
+              {mode === "signup" ? "Создать аккаунт" : mode === "forgot" ? "Сбросить пароль" : "С возвращением"}
+            </h2>
             <p className="text-muted-foreground mt-3">
               {mode === "signup"
                 ? "Доступ выдаёт куратор после оплаты. Создайте профиль с тем e-mail, который вы передали."
-                : "Введите e-mail и пароль, чтобы продолжить путь."}
+                : mode === "forgot"
+                  ? "Если входите с нового браузера и пароль не подходит, отправьте себе ссылку для смены пароля."
+                  : "Введите e-mail и пароль, чтобы продолжить путь."}
             </p>
           </div>
 
@@ -143,26 +168,47 @@ export default function Auth() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 className="h-12"
-                required
+                required={mode !== "forgot"}
                 minLength={6}
                 autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                disabled={mode === "forgot"}
               />
             </div>
 
             <Button type="submit" variant="amber" size="lg" className="w-full" disabled={loading}>
-              {loading ? "Минутку…" : mode === "signup" ? "Создать аккаунт" : "Войти"}
+              {loading ? "Минутку…" : mode === "signup" ? "Создать аккаунт" : mode === "forgot" ? "Отправить ссылку" : "Войти"}
             </Button>
           </form>
 
-          <div className="text-center text-sm text-muted-foreground">
-            {mode === "signup" ? "Уже есть аккаунт?" : "Впервые здесь?"}{" "}
-            <button
-              type="button"
-              onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
-              className="font-semibold text-foreground underline underline-offset-4 hover:text-amber"
-            >
-              {mode === "signup" ? "Войти" : "Создать аккаунт"}
-            </button>
+          <div className="space-y-3 text-center text-sm text-muted-foreground">
+            <div>
+              {mode === "signup" ? "Уже есть аккаунт?" : mode === "forgot" ? "Вспомнили пароль?" : "Впервые здесь?"}{" "}
+              <button
+                type="button"
+                onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
+                className="font-semibold text-foreground underline underline-offset-4 hover:text-amber"
+              >
+                {mode === "signup" ? "Войти" : "Создать аккаунт"}
+              </button>
+            </div>
+
+            {mode !== "forgot" ? (
+              <button
+                type="button"
+                onClick={() => setMode("forgot")}
+                className="font-semibold text-foreground underline underline-offset-4 hover:text-amber"
+              >
+                Сбросить пароль
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setMode("signin")}
+                className="font-semibold text-foreground underline underline-offset-4 hover:text-amber"
+              >
+                Назад ко входу
+              </button>
+            )}
           </div>
         </div>
       </div>
