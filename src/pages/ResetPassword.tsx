@@ -2,8 +2,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { PasswordField } from "@/components/PasswordField";
 import { toast } from "sonner";
 
 export default function ResetPassword() {
@@ -70,33 +69,25 @@ export default function ResetPassword() {
 
         {ready ? (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="new-password">Новый пароль</Label>
-              <Input
-                id="new-password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="h-12"
-                minLength={6}
-                required
-                autoComplete="new-password"
-              />
-            </div>
+            <PasswordField
+              id="new-password"
+              label="Новый пароль"
+              value={password}
+              onValueChange={setPassword}
+              minLength={6}
+              required
+              autoComplete="new-password"
+            />
 
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Повторите пароль</Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="h-12"
-                minLength={6}
-                required
-                autoComplete="new-password"
-              />
-            </div>
+            <PasswordField
+              id="confirm-password"
+              label="Повторите пароль"
+              value={confirmPassword}
+              onValueChange={setConfirmPassword}
+              minLength={6}
+              required
+              autoComplete="new-password"
+            />
 
             <Button type="submit" variant="amber" size="lg" className="w-full" disabled={loading}>
               {loading ? "Сохраняем…" : "Сохранить пароль"}
