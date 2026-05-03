@@ -73,6 +73,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             {profile?.full_name && (
               <span className="text-sm text-muted-foreground hidden lg:inline">{profile.full_name}</span>
             )}
+            <NavLink to="/account" className={({ isActive }) => cn("p-2 rounded-full transition-colors", isActive ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")} aria-label="Личный кабинет">
+              <UserCog className="h-4 w-4" />
+            </NavLink>
             <Button variant="ghost" size="sm" onClick={handleSignOut} aria-label="Выйти">
               <LogOut className="h-4 w-4" />
             </Button>
