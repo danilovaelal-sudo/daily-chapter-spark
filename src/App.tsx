@@ -13,6 +13,7 @@ import Progress from "./pages/Progress";
 import Materials from "./pages/Materials";
 import Support from "./pages/Support";
 import Admin from "./pages/Admin";
+import Account from "./pages/Account";
 import AccessEnded from "./pages/AccessEnded";
 import NotFound from "./pages/NotFound.tsx";
 
