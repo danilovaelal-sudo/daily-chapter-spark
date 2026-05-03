@@ -6,17 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import heroImg from "@/assets/hero.jpg";
 
-const getRedirectUrl = () => {
-  const { origin, pathname } = window.location;
-  // Берём базовый путь приложения (всё до /auth)
-  const basePath = pathname.replace(/\/auth.*$/, "/").replace(/\/+$/, "/") || "/";
-  return `${origin}${basePath}`;
-};
-
 export default function Auth() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [hasSession, setHasSession] = useState<boolean | null>(null);
 
@@ -32,7 +24,7 @@ export default function Auth() {
 
   if (hasSession) return <Navigate to="/" replace />;
 
-  const sendLink = async () => {
+  const login = async () => {
     const normalizedEmail = email.trim().toLowerCase();
     if (!normalizedEmail) {
       setMessage("Введите e-mail, который вы указали при оплате.");
@@ -41,22 +33,33 @@ export default function Auth() {
     setLoading(true);
     setMessage(null);
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: normalizedEmail,
-        options: { emailRedirectTo: getRedirectUrl() },
+      const { data, error } = await supabase.functions.invoke("simple-login", {
+        body: { email: normalizedEmail },
       });
-      if (error) throw error;
-      setSent(true);
+      if (error || !data?.token_hash) {
+        setMessage(data?.error || "Не получилось войти. Проверьте e-mail или напишите куратору.");
+        setLoading(false);
+        return;
+      }
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        type: "magiclink",
+        token_hash: data.token_hash,
+      });
+      if (verifyError) {
+        setMessage("Не получилось войти. Попробуйте ещё раз.");
+        setLoading(false);
+        return;
+      }
+      // onAuthStateChange сделает редирект
     } catch {
-      setMessage("Не получилось отправить письмо. Проверьте e-mail или напишите куратору.");
-    } finally {
+      setMessage("Не получилось войти. Проверьте подключение к интернету.");
       setLoading(false);
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    sendLink();
+    login();
   };
 
   return (
@@ -104,61 +107,33 @@ export default function Auth() {
           <div>
             <div className="eyebrow text-amber mb-3">Курс</div>
             <h2 className="display-lg">Вход в Мастерскую</h2>
-            {!sent && (
-              <p className="text-muted-foreground mt-3">
-                Введите e-mail, который вы указали при оплате. Мы отправим вам личную ссылку для входа.
-              </p>
-            )}
+            <p className="text-muted-foreground mt-3">
+              Введите e-mail, который вы указали при оплате — и сразу попадёте в курс.
+            </p>
           </div>
 
-          {sent ? (
-            <div className="space-y-6">
-              <div className="rounded-2xl border-2 border-foreground/10 bg-accent/10 p-6 space-y-3">
-                <p className="font-display text-xl">Мы отправили ссылку для входа на вашу почту.</p>
-                <p className="text-muted-foreground">
-                  Откройте письмо и нажмите на кнопку внутри. Если письма нет, проверьте папку «Спам».
-                </p>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="lg"
-                className="w-full"
-                disabled={loading}
-                onClick={sendLink}
-              >
-                {loading ? "Минутку…" : "Отправить ссылку ещё раз"}
-              </Button>
-              {message && <p className="text-sm text-center text-muted-foreground">{message}</p>}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@email.com"
+                className="h-12"
+                autoComplete="email"
+              />
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">E-mail</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@email.com"
-                  className="h-12"
-                  autoComplete="email"
-                />
-              </div>
 
-              <Button type="submit" variant="amber" size="lg" className="w-full" disabled={loading}>
-                {loading ? "Отправляем…" : "Получить ссылку для входа"}
-              </Button>
+            <Button type="submit" variant="amber" size="lg" className="w-full" disabled={loading}>
+              {loading ? "Входим…" : "Войти"}
+            </Button>
 
-              <p className="text-sm text-muted-foreground text-center">
-                Письмо обычно приходит в течение минуты. Если его нет, проверьте папку «Спам».
-              </p>
-
-              {message && (
-                <p className="text-sm text-center text-foreground/80 bg-amber/10 rounded-md p-3">{message}</p>
-              )}
-            </form>
-          )}
+            {message && (
+              <p className="text-sm text-center text-foreground/80 bg-amber/10 rounded-md p-3">{message}</p>
+            )}
+          </form>
         </div>
       </div>
     </div>
