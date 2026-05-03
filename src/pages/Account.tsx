@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordField } from "@/components/PasswordField";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -70,14 +71,8 @@ export default function Account() {
           <KeyRound className="h-5 w-5" /> Смена пароля
         </h2>
         <form onSubmit={changePassword} className="space-y-4">
-          <div className="space-y-2">
-            <Label>Новый пароль</Label>
-            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
-          </div>
-          <div className="space-y-2">
-            <Label>Повторите пароль</Label>
-            <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required minLength={6} />
-          </div>
+          <PasswordField id="account-new-password" label="Новый пароль" value={password} onValueChange={setPassword} required minLength={6} autoComplete="new-password" />
+          <PasswordField id="account-confirm-password" label="Повторите пароль" value={confirm} onValueChange={setConfirm} required minLength={6} autoComplete="new-password" />
           <Button type="submit" variant="amber" disabled={savingPwd}>
             {savingPwd ? "Обновляем..." : "Сменить пароль"}
           </Button>
