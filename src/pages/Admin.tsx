@@ -79,6 +79,14 @@ function UsersTab() {
     load();
   };
 
+  const removeUser = async (id: string, email: string | null) => {
+    if (!confirm(`Удалить пользователя ${email ?? id}? Это действие необратимо.`)) return;
+    const { error } = await supabase.functions.invoke("delete-user", { body: { userId: id } });
+    if (error) { toast.error(error.message); return; }
+    toast.success("Пользователь удалён");
+    load();
+  };
+
   return (
     <div>
       <p className="text-muted-foreground mb-6 text-sm">
@@ -92,6 +100,7 @@ function UsersTab() {
               <th className="text-left p-4 font-semibold">E-mail</th>
               <th className="text-left p-4 font-semibold">Старт</th>
               <th className="text-left p-4 font-semibold">Прогресс</th>
+              <th className="text-left p-4 font-semibold"></th>
             </tr>
           </thead>
           <tbody>
@@ -113,11 +122,20 @@ function UsersTab() {
                     <div className="text-xs text-muted-foreground mt-1">День {day}/30</div>
                   </td>
                   <td className="p-4 font-mono">{progress[u.id] ?? 0}/30</td>
+                  <td className="p-4">
+                    <button
+                      onClick={() => removeUser(u.id, u.email)}
+                      className="p-2 text-muted-foreground hover:text-destructive transition-colors"
+                      aria-label="Удалить пользователя"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </td>
                 </tr>
               );
             })}
             {users.length === 0 && (
-              <tr><td colSpan={4} className="p-8 text-center text-muted-foreground">Пока нет пользователей</td></tr>
+              <tr><td colSpan={5} className="p-8 text-center text-muted-foreground">Пока нет пользователей</td></tr>
             )}
           </tbody>
         </table>
