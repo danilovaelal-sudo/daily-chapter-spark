@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Edit, Save, Users, BookOpen, Folder, Plus, Trash2 } from "lucide-react";
+import { Edit, Save, Users, BookOpen, Folder, Plus, Trash2, CalendarPlus } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -81,6 +81,25 @@ function UsersTab() {
     const { error } = await supabase.from("profiles").update({ start_date: date }).eq("id", id);
     if (error) { toast.error(error.message); return; }
     toast.success("Дата старта обновлена");
+    load();
+  };
+
+  const extendAccess = async (u: Profile) => {
+    // Сдвигаем start_date так, чтобы остаток доступа стал 30 дней от сегодня.
+    // Если доступ ещё активен — добавляем 30 дней к текущей дате окончания.
+    const start = new Date(u.start_date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 30);
+    const baseDate = end > today ? end : today;
+    const newStart = new Date(baseDate);
+    newStart.setDate(newStart.getDate() - 30 + 30); // newStart = baseDate, чтобы 30 дней от baseDate
+    // Хотим, чтобы конец доступа = baseDate + 30 → start_date = baseDate
+    const newStartStr = baseDate.toISOString().slice(0, 10);
+    const { error } = await supabase.from("profiles").update({ start_date: newStartStr }).eq("id", u.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Доступ продлён на 30 дней");
     load();
   };
 
@@ -170,13 +189,23 @@ function UsersTab() {
                   </td>
                   <td className="p-4 font-mono">{progress[u.id] ?? 0}/30</td>
                   <td className="p-4">
-                    <button
-                      onClick={() => removeUser(u.id, u.email)}
-                      className="p-2 text-muted-foreground hover:text-destructive transition-colors"
-                      aria-label="Удалить пользователя"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => extendAccess(u)}
+                        className="p-2 text-muted-foreground hover:text-amber transition-colors"
+                        aria-label="Продлить доступ на 30 дней"
+                        title="Продлить доступ на 30 дней"
+                      >
+                        <CalendarPlus className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => removeUser(u.id, u.email)}
+                        className="p-2 text-muted-foreground hover:text-destructive transition-colors"
+                        aria-label="Удалить пользователя"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );
