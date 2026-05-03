@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { ReactNode } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth, getAccessInfo } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { BookOpen, LayoutGrid, BarChart3, Folder, LifeBuoy, Shield, LogOut, Menu, X, UserCog } from "lucide-react";
 import { useState } from "react";
@@ -18,6 +18,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const { signOut, profile, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const access = profile ? getAccessInfo(profile.start_date) : null;
+  const showProgress = !isAdmin && access?.hasStarted && access.hasAccess;
 
   const handleSignOut = async () => {
     await signOut();
@@ -89,6 +91,21 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
+
+        {showProgress && access && (
+          <div className="container pb-2 -mt-1">
+            <div className="flex items-center justify-between text-[11px] uppercase tracking-widest text-muted-foreground mb-1">
+              <span>День {access.daysElapsed} из 30</span>
+              <span>осталось {access.daysRemaining} {access.daysRemaining === 1 ? "день" : access.daysRemaining < 5 ? "дня" : "дней"}</span>
+            </div>
+            <div className="h-1 w-full rounded-full bg-foreground/10 overflow-hidden">
+              <div
+                className="h-full bg-amber transition-all"
+                style={{ width: `${Math.min(100, (access.daysElapsed / 30) * 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
 
         {open && (
           <div className="md:hidden border-t border-foreground/10 bg-background animate-fade-up">
