@@ -18,10 +18,9 @@ const getAppBaseUrl = () => {
 const appUrl = (path = "") => new URL(path.replace(/^\//, ""), getAppBaseUrl()).toString();
 
 export default function Auth() {
-  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
+  const [mode, setMode] = useState<"signin" | "email-link" | "forgot">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [hasSession, setHasSession] = useState<boolean | null>(null);
   const navigate = useNavigate();
@@ -54,18 +53,13 @@ export default function Auth() {
         if (error) throw error;
         toast.success("Отправили письмо для смены пароля.");
         setMode("signin");
-      } else if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+      } else if (mode === "email-link") {
+        const { error } = await supabase.auth.signInWithOtp({
           email: normalizedEmail,
-          password,
-          options: {
-            emailRedirectTo: appUrl(),
-            data: { full_name: fullName.trim() },
-          },
+          options: { emailRedirectTo: appUrl() },
         });
         if (error) throw error;
-        toast.success("Аккаунт создан. Добро пожаловать в мастерскую.");
-        navigate("/");
+        toast.success("Отправили ссылку для входа. Откройте письмо и нажмите кнопку входа.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
         if (error) throw error;
@@ -135,31 +129,18 @@ export default function Auth() {
           <div>
             <div className="eyebrow text-amber mb-3">Вход в курс</div>
             <h2 className="display-lg">
-              {mode === "signup" ? "Создать аккаунт" : mode === "forgot" ? "Сбросить пароль" : "С возвращением"}
+              {mode === "email-link" ? "Войти по письму" : mode === "forgot" ? "Сбросить пароль" : "Вход"}
             </h2>
             <p className="text-muted-foreground mt-3">
-              {mode === "signup"
-                ? "Доступ выдаёт куратор после оплаты. Создайте профиль с тем e-mail, который вы передали."
+              {mode === "email-link"
+                ? "Введите e-mail — мы пришлём ссылку, по которой можно войти без пароля."
                 : mode === "forgot"
                   ? "Если входите с нового браузера и пароль не подходит, отправьте себе ссылку для смены пароля."
-                  : "Введите e-mail и пароль, чтобы продолжить путь."}
+                  : "Введите e-mail и пароль. Если пароль снова мешает — выберите вход по письму."}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === "signup" && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Как к вам обращаться</Label>
-                <Input
-                  id="name"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Имя"
-                  className="h-12"
-                  required
-                />
-              </div>
-            )}
             <div className="space-y-2">
               <Label htmlFor="email">E-mail</Label>
               <Input
@@ -173,32 +154,34 @@ export default function Auth() {
                 autoComplete="email"
               />
             </div>
-            <PasswordField
-              id="password"
-              label="Пароль"
-              value={password}
-              onValueChange={setPassword}
-              placeholder="••••••••"
-              required={mode !== "forgot"}
-              minLength={6}
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              disabled={mode === "forgot"}
-            />
+
+            {mode === "signin" && (
+              <PasswordField
+                id="password"
+                label="Пароль"
+                value={password}
+                onValueChange={setPassword}
+                placeholder="••••••••"
+                required
+                minLength={6}
+                autoComplete="current-password"
+              />
+            )}
 
             <Button type="submit" variant="amber" size="lg" className="w-full" disabled={loading}>
-              {loading ? "Минутку…" : mode === "signup" ? "Создать аккаунт" : mode === "forgot" ? "Отправить ссылку" : "Войти"}
+              {loading ? "Минутку…" : mode === "forgot" ? "Сменить пароль" : mode === "email-link" ? "Прислать ссылку для входа" : "Войти"}
             </Button>
           </form>
 
           <div className="space-y-3 text-center text-sm text-muted-foreground">
             <div>
-              {mode === "signup" ? "Уже есть аккаунт?" : mode === "forgot" ? "Вспомнили пароль?" : "Впервые здесь?"}{" "}
+              {mode === "email-link" ? "Хотите войти с паролем?" : mode === "forgot" ? "Вспомнили пароль?" : "Не хотите вводить пароль?"}{" "}
               <button
                 type="button"
-                onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
+                onClick={() => setMode(mode === "signin" ? "email-link" : "signin")}
                 className="font-semibold text-foreground underline underline-offset-4 hover:text-amber"
               >
-                {mode === "signup" ? "Войти" : "Создать аккаунт"}
+                {mode === "signin" ? "Войти по ссылке из письма" : "Войти с паролем"}
               </button>
             </div>
 
