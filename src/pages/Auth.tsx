@@ -66,8 +66,8 @@ export default function Auth() {
         toast.success("С возвращением");
         navigate("/");
       }
-    } catch (err: any) {
-      const message = err?.message ?? "Что-то пошло не так";
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Что-то пошло не так";
       if (message.toLowerCase().includes("invalid login credentials")) {
         toast.error(
           hasCyrillicChars(password)
@@ -169,7 +169,7 @@ export default function Auth() {
             )}
 
             <Button type="submit" variant="amber" size="lg" className="w-full" disabled={loading}>
-              {loading ? "Минутку…" : mode === "forgot" ? "Сменить пароль" : mode === "email-link" ? "Прислать ссылку для входа" : "Войти"}
+              {loading ? "Минутку…" : mode === "forgot" ? "Отправить ссылку" : mode === "email-link" ? "Прислать ссылку для входа" : "Войти"}
             </Button>
           </form>
 
