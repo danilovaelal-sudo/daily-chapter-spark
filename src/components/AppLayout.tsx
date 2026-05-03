@@ -92,6 +92,21 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </button>
         </div>
 
+        {showProgress && access && (
+          <div className="container pb-2 -mt-1">
+            <div className="flex items-center justify-between text-[11px] uppercase tracking-widest text-muted-foreground mb-1">
+              <span>День {access.daysElapsed} из 30</span>
+              <span>осталось {access.daysRemaining} {access.daysRemaining === 1 ? "день" : access.daysRemaining < 5 ? "дня" : "дней"}</span>
+            </div>
+            <div className="h-1 w-full rounded-full bg-foreground/10 overflow-hidden">
+              <div
+                className="h-full bg-amber transition-all"
+                style={{ width: `${Math.min(100, (access.daysElapsed / 30) * 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
+
         {open && (
           <div className="md:hidden border-t border-foreground/10 bg-background animate-fade-up">
             <nav className="container py-3 flex flex-col gap-1">
