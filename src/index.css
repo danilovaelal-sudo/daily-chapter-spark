@@ -135,29 +135,36 @@
   .display-xl {
     font-family: var(--font-display);
     font-weight: 900;
-    font-size: clamp(3.5rem, 14vw, 9rem);
-    line-height: 0.86;
-    letter-spacing: -0.045em;
+    font-size: clamp(2.5rem, 11vw, 9rem);
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    overflow-wrap: anywhere;
+    hyphens: auto;
   }
 
   .display-lg {
     font-family: var(--font-display);
     font-weight: 900;
-    font-size: clamp(2.5rem, 9vw, 5.5rem);
-    line-height: 0.9;
-    letter-spacing: -0.035em;
+    font-size: clamp(2rem, 8vw, 5.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    overflow-wrap: anywhere;
+    hyphens: auto;
   }
 
   .display-md {
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: clamp(1.875rem, 5.5vw, 3.25rem);
-    line-height: 0.98;
-    letter-spacing: -0.025em;
+    font-size: clamp(1.625rem, 5.2vw, 3.25rem);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+    hyphens: auto;
   }
 
   .eyebrow {
-    @apply uppercase tracking-[0.22em] text-[11px] font-bold;
+    @apply uppercase tracking-[0.18em] text-[11px] font-bold;
+    overflow-wrap: anywhere;
   }
 
   .editorial-rule {
