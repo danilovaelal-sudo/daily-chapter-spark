@@ -6,7 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import heroImg from "@/assets/hero.jpg";
 
-const REDIRECT_URL = "https://danilovaelal-sudo.github.io/daily-chapter-spark/";
+const getRedirectUrl = () => {
+  const { origin, pathname } = window.location;
+  // Берём базовый путь приложения (всё до /auth)
+  const basePath = pathname.replace(/\/auth.*$/, "/").replace(/\/+$/, "/") || "/";
+  return `${origin}${basePath}`;
+};
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -38,7 +43,7 @@ export default function Auth() {
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email: normalizedEmail,
-        options: { emailRedirectTo: REDIRECT_URL },
+        options: { emailRedirectTo: getRedirectUrl() },
       });
       if (error) throw error;
       setSent(true);
