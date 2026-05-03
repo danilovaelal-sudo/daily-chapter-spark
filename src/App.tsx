@@ -18,13 +18,17 @@ import AccessEnded from "./pages/AccessEnded";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
+const configuredBase = import.meta.env.BASE_URL?.replace(/\/$/, "") || "";
+const routerBasename = configuredBase && configuredBase !== "" && window.location.pathname.startsWith(configuredBase)
+  ? configuredBase
+  : undefined;
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-     <BrowserRouter basename="/daily-chapter-spark">
+     <BrowserRouter basename={routerBasename}>
         <Routes>
           <Route path="/auth" element={<Auth />} />
           <Route path="/reset-password" element={<ResetPassword />} />
