@@ -43,52 +43,50 @@ export default function Account() {
 
   return (
     <div className="container py-10 md:py-14 max-w-2xl">
-      <></>
-        <div className="eyebrow text-amber mb-3">Личный кабинет</div>
-        <h1 className="display-lg mb-8">Настройки</h1>
+      <div className="eyebrow text-amber mb-3">Личный кабинет</div>
+      <h1 className="display-lg mb-8">Настройки</h1>
 
-        <section className="rounded-2xl border-2 border-foreground/10 bg-card p-6 mb-6">
-          <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2">
-            <UserIcon className="h-5 w-5" /> Профиль
-          </h2>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>E-mail</Label>
-              <Input value={user?.email ?? ""} disabled />
-            </div>
-            <div className="space-y-2">
-              <Label>Имя</Label>
-              <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Ваше имя" />
-            </div>
-            <Button variant="ink" onClick={saveName} disabled={savingName}>
-              {savingName ? "Сохраняем..." : "Сохранить имя"}
-            </Button>
+      <section className="rounded-2xl border-2 border-foreground/10 bg-card p-6 mb-6">
+        <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2">
+          <UserIcon className="h-5 w-5" /> Профиль
+        </h2>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>E-mail</Label>
+            <Input value={user?.email ?? ""} disabled />
           </div>
-        </section>
-
-        <section className="rounded-2xl border-2 border-foreground/10 bg-card p-6">
-          <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2">
-            <KeyRound className="h-5 w-5" /> Смена пароля
-          </h2>
-          <form onSubmit={changePassword} className="space-y-4">
-            <div className="space-y-2">
-              <Label>Новый пароль</Label>
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
-            </div>
-            <div className="space-y-2">
-              <Label>Повторите пароль</Label>
-              <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required minLength={6} />
-            </div>
-            <Button type="submit" variant="amber" disabled={savingPwd}>
-              {savingPwd ? "Обновляем..." : "Сменить пароль"}
-            </Button>
-          </form>
-        </section>
-
-        <div className="mt-8">
-          <Button variant="outline" onClick={() => navigate(-1)}>Назад</Button>
+          <div className="space-y-2">
+            <Label>Имя</Label>
+            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Ваше имя" />
+          </div>
+          <Button variant="ink" onClick={saveName} disabled={savingName}>
+            {savingName ? "Сохраняем..." : "Сохранить имя"}
+          </Button>
         </div>
+      </section>
+
+      <section className="rounded-2xl border-2 border-foreground/10 bg-card p-6">
+        <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2">
+          <KeyRound className="h-5 w-5" /> Смена пароля
+        </h2>
+        <form onSubmit={changePassword} className="space-y-4">
+          <div className="space-y-2">
+            <Label>Новый пароль</Label>
+            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+          </div>
+          <div className="space-y-2">
+            <Label>Повторите пароль</Label>
+            <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required minLength={6} />
+          </div>
+          <Button type="submit" variant="amber" disabled={savingPwd}>
+            {savingPwd ? "Обновляем..." : "Сменить пароль"}
+          </Button>
+        </form>
+      </section>
+
+      <div className="mt-8">
+        <Button variant="outline" onClick={() => navigate(-1)}>Назад</Button>
       </div>
-    </AppLayout>
+    </div>
   );
 }
