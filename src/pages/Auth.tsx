@@ -7,7 +7,14 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import heroImg from "@/assets/hero.jpg";
 
-const appUrl = (path = "") => new URL(path.replace(/^\//, ""), `${window.location.origin}${import.meta.env.BASE_URL}`).toString();
+const getAppBaseUrl = () => {
+  const basePath = import.meta.env.BASE_URL || "/";
+  const shouldUseBasePath = basePath !== "/" && window.location.pathname.startsWith(basePath);
+
+  return `${window.location.origin}${shouldUseBasePath ? basePath : "/"}`;
+};
+
+const appUrl = (path = "") => new URL(path.replace(/^\//, ""), getAppBaseUrl()).toString();
 
 export default function Auth() {
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
