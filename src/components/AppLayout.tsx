@@ -2,7 +2,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { BookOpen, LayoutGrid, BarChart3, Folder, LifeBuoy, Shield, LogOut, Menu, X } from "lucide-react";
+import { BookOpen, LayoutGrid, BarChart3, Folder, LifeBuoy, Shield, LogOut, Menu, X, UserCog } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -73,6 +73,9 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             {profile?.full_name && (
               <span className="text-sm text-muted-foreground hidden lg:inline">{profile.full_name}</span>
             )}
+            <NavLink to="/account" className={({ isActive }) => cn("p-2 rounded-full transition-colors", isActive ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")} aria-label="Личный кабинет">
+              <UserCog className="h-4 w-4" />
+            </NavLink>
             <Button variant="ghost" size="sm" onClick={handleSignOut} aria-label="Выйти">
               <LogOut className="h-4 w-4" />
             </Button>
@@ -125,6 +128,19 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   Админ-панель
                 </NavLink>
               )}
+              <NavLink
+                to="/account"
+                onClick={() => setOpen(false)}
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium",
+                    isActive ? "bg-foreground text-background" : "hover:bg-foreground/5"
+                  )
+                }
+              >
+                <UserCog className="h-5 w-5" />
+                Личный кабинет
+              </NavLink>
               <button
                 onClick={handleSignOut}
                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-muted-foreground hover:bg-foreground/5 text-left"
