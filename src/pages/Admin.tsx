@@ -60,6 +60,11 @@ export default function Admin() {
 function UsersTab() {
   const [users, setUsers] = useState<Profile[]>([]);
   const [progress, setProgress] = useState<Record<string, number>>({});
+  const [adding, setAdding] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newStart, setNewStart] = useState(new Date().toISOString().slice(0, 10));
+  const [busy, setBusy] = useState(false);
 
   const load = async () => {
     const { data: profs } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
@@ -80,18 +85,60 @@ function UsersTab() {
   };
 
   const removeUser = async (id: string, email: string | null) => {
-    if (!confirm(`Удалить пользователя ${email ?? id}? Это действие необратимо.`)) return;
-    const { error } = await supabase.functions.invoke("delete-user", { body: { userId: id } });
-    if (error) { toast.error(error.message); return; }
-    toast.success("Пользователь удалён");
+    if (!confirm(`Удалить участницу ${email ?? id}? Это действие необратимо.`)) return;
+    const { data, error } = await supabase.functions.invoke("admin-delete-user", { body: { user_id: id } });
+    if (error || data?.error) { toast.error(data?.error || error?.message || "Ошибка"); return; }
+    toast.success("Участница удалена");
+    load();
+  };
+
+  const addUser = async () => {
+    if (!newEmail.trim()) { toast.error("Введите e-mail"); return; }
+    setBusy(true);
+    const { data, error } = await supabase.functions.invoke("admin-add-user", {
+      body: { email: newEmail, full_name: newName, start_date: newStart },
+    });
+    setBusy(false);
+    if (error || data?.error) { toast.error(data?.error || error?.message || "Ошибка"); return; }
+    toast.success("Участница добавлена. Доступ на 30 дней открыт.");
+    setNewEmail(""); setNewName(""); setAdding(false);
     load();
   };
 
   return (
     <div>
-      <p className="text-muted-foreground mb-6 text-sm">
-        Чтобы добавить пользователя — попросите его зарегистрироваться, затем здесь установите дату старта. Доступ действует 30 дней с этой даты.
-      </p>
+      <div className="flex items-start justify-between gap-4 mb-6 flex-wrap">
+        <p className="text-muted-foreground text-sm max-w-xl">
+          Добавьте участницу по e-mail — и она сможет войти, просто введя свою почту.
+          Доступ действует 30 дней с даты старта.
+        </p>
+        <Button variant="ink" onClick={() => setAdding((v) => !v)}>
+          <Plus className="h-4 w-4 mr-1" /> {adding ? "Закрыть" : "Добавить участницу"}
+        </Button>
+      </div>
+
+      {adding && (
+        <div className="rounded-2xl border-2 border-amber bg-amber/5 p-6 space-y-4 max-w-2xl mb-6">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>E-mail</Label>
+              <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="name@email.com" />
+            </div>
+            <div className="space-y-2">
+              <Label>Имя (необязательно)</Label>
+              <Input value={newName} onChange={(e) => setNewName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Дата старта</Label>
+              <Input type="date" value={newStart} onChange={(e) => setNewStart(e.target.value)} />
+            </div>
+          </div>
+          <Button variant="amber" onClick={addUser} disabled={busy}>
+            {busy ? "Добавляем…" : "Добавить и открыть доступ"}
+          </Button>
+        </div>
+      )}
+
       <div className="border-2 border-foreground/10 rounded-2xl overflow-hidden">
         <table className="w-full text-sm">
           <thead className="bg-foreground text-background">

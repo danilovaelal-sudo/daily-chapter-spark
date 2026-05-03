@@ -1,1 +1,4 @@
 project_id = "ceudtbagpizjtoglmqxb"
+
+[functions.simple-login]
+verify_jwt = false
