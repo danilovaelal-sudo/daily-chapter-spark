@@ -36,16 +36,16 @@ export default function Auth() {
       const { data, error } = await supabase.functions.invoke("simple-login", {
         body: { email: normalizedEmail },
       });
-      if (error || !data?.token_hash) {
+      if (error || !data?.access_token || !data?.refresh_token) {
         setMessage(data?.error || "Не получилось войти. Проверьте e-mail или напишите куратору.");
         setLoading(false);
         return;
       }
-      const { error: verifyError } = await supabase.auth.verifyOtp({
-        type: "magiclink",
-        token_hash: data.token_hash,
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
       });
-      if (verifyError) {
+      if (sessionError) {
         setMessage("Не получилось войти. Попробуйте ещё раз.");
         setLoading(false);
         return;
