@@ -7,6 +7,15 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import heroImg from "@/assets/hero.jpg";
 
+const getAppBaseUrl = () => {
+  const basePath = import.meta.env.BASE_URL || "/";
+  const shouldUseBasePath = basePath !== "/" && window.location.pathname.startsWith(basePath);
+
+  return `${window.location.origin}${shouldUseBasePath ? basePath : "/"}`;
+};
+
+const appUrl = (path = "") => new URL(path.replace(/^\//, ""), getAppBaseUrl()).toString();
+
 export default function Auth() {
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [email, setEmail] = useState("");
@@ -39,7 +48,7 @@ export default function Auth() {
     try {
       if (mode === "forgot") {
         const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-          redirectTo: `${window.location.origin}/reset-password`,
+          redirectTo: appUrl("reset-password"),
         });
         if (error) throw error;
         toast.success("Отправили письмо для смены пароля.");
@@ -49,7 +58,7 @@ export default function Auth() {
           email: normalizedEmail,
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: appUrl(),
             data: { full_name: fullName.trim() },
           },
         });
