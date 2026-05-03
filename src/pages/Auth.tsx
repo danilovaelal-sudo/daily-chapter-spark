@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordField, hasCyrillicChars } from "@/components/PasswordField";
 import { toast } from "sonner";
 import heroImg from "@/assets/hero.jpg";
 
@@ -74,7 +75,11 @@ export default function Auth() {
     } catch (err: any) {
       const message = err?.message ?? "Что-то пошло не так";
       if (message.toLowerCase().includes("invalid login credentials")) {
-        toast.error("Неверный e-mail или пароль. Если входите с другого браузера, нажмите «Сбросить пароль».");
+        toast.error(
+          hasCyrillicChars(password)
+            ? "В пароле есть русские буквы, похожие на латинские. Нажмите глаз рядом с паролем и проверьте раскладку."
+            : "Неверный e-mail или пароль. Если входите с другого браузера, нажмите «Сбросить пароль».",
+        );
       } else {
         toast.error(message);
       }
@@ -168,21 +173,17 @@ export default function Auth() {
                 autoComplete="email"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Пароль</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="h-12"
-                required={mode !== "forgot"}
-                minLength={6}
-                autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                disabled={mode === "forgot"}
-              />
-            </div>
+            <PasswordField
+              id="password"
+              label="Пароль"
+              value={password}
+              onValueChange={setPassword}
+              placeholder="••••••••"
+              required={mode !== "forgot"}
+              minLength={6}
+              autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              disabled={mode === "forgot"}
+            />
 
             <Button type="submit" variant="amber" size="lg" className="w-full" disabled={loading}>
               {loading ? "Минутку…" : mode === "signup" ? "Создать аккаунт" : mode === "forgot" ? "Отправить ссылку" : "Войти"}
