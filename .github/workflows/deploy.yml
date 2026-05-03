@@ -33,6 +33,10 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_SUPABASE_URL: https://ceudtbagpizjtoglmqxb.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNldWR0YmFncGl6anRvZ2xtcXhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NTg5ODUsImV4cCI6MjA5MjUzNDk4NX0.hC0fUN14c0XYBQz0Z-53fr4D9xcdNToOnjDvQtj3lMY
+          VITE_SUPABASE_PROJECT_ID: ceudtbagpizjtoglmqxb
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
