@@ -128,6 +128,19 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                   Админ-панель
                 </NavLink>
               )}
+              <NavLink
+                to="/account"
+                onClick={() => setOpen(false)}
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium",
+                    isActive ? "bg-foreground text-background" : "hover:bg-foreground/5"
+                  )
+                }
+              >
+                <UserCog className="h-5 w-5" />
+                Личный кабинет
+              </NavLink>
               <button
                 onClick={handleSignOut}
                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-muted-foreground hover:bg-foreground/5 text-left"
