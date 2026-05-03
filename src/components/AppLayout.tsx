@@ -2,7 +2,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { BookOpen, LayoutGrid, BarChart3, Folder, LifeBuoy, Shield, LogOut, Menu, X } from "lucide-react";
+import { BookOpen, LayoutGrid, BarChart3, Folder, LifeBuoy, Shield, LogOut, Menu, X, UserCog } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
