@@ -42,8 +42,8 @@ export default function Account() {
   };
 
   return (
-    <AppLayout>
-      <div className="container py-10 md:py-14 max-w-2xl">
+    <div className="container py-10 md:py-14 max-w-2xl">
+      <></>
         <div className="eyebrow text-amber mb-3">Личный кабинет</div>
         <h1 className="display-lg mb-8">Настройки</h1>
 
