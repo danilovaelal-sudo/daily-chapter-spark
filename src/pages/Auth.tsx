@@ -56,7 +56,7 @@ export default function Auth() {
       } else if (mode === "email-link") {
         const { error } = await supabase.auth.signInWithOtp({
           email: normalizedEmail,
-          options: { emailRedirectTo: appUrl() },
+          options: { emailRedirectTo: appUrl(), shouldCreateUser: false },
         });
         if (error) throw error;
         toast.success("Отправили ссылку для входа. Откройте письмо и нажмите кнопку входа.");
