@@ -1,6 +1,6 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { ReactNode } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth, getAccessInfo } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { BookOpen, LayoutGrid, BarChart3, Folder, LifeBuoy, Shield, LogOut, Menu, X, UserCog } from "lucide-react";
 import { useState } from "react";
@@ -18,6 +18,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const { signOut, profile, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const access = profile ? getAccessInfo(profile.start_date) : null;
+  const showProgress = !isAdmin && access?.hasStarted && access.hasAccess;
 
   const handleSignOut = async () => {
     await signOut();
