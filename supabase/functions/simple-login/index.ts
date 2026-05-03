@@ -35,7 +35,8 @@ Deno.serve(async (req) => {
       }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Генерируем magic link и возвращаем hashed_token, который клиент подставит в verifyOtp
+    // Генерируем одноразовый токен и подтверждаем его прямо на сервере.
+    // Так GitHub Pages не зависит от ссылок, redirect URL и особенностей мобильного браузера.
     const { data, error } = await admin.auth.admin.generateLink({
       type: "magiclink",
       email: normalized,
@@ -46,8 +47,26 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({
+    const authClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { auth: { persistSession: false, autoRefreshToken: false } },
+    );
+
+    const { data: verified, error: verifyError } = await authClient.auth.verifyOtp({
+      type: "magiclink",
       token_hash: data.properties.hashed_token,
+    });
+
+    if (verifyError || !verified.session) {
+      return new Response(JSON.stringify({ error: "Не удалось войти. Попробуйте ещё раз." }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify({
+      access_token: verified.session.access_token,
+      refresh_token: verified.session.refresh_token,
       email: normalized,
     }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
